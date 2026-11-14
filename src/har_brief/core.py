@@ -6,6 +6,7 @@ from urllib.parse import urlsplit
 
 MAX_BYTES = 32 * 1024 * 1024
 MAX_ENTRIES = 100_000
+MAX_DEPTH = 128
 MAX_MS = 7 * 24 * 60 * 60 * 1000
 MAX_SIZE = 2**53 - 1
 METHODS = frozenset(("GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH"))
@@ -35,6 +36,25 @@ def parse(raw):
     """Read bounded UTF-8 JSON (optional BOM). Never include parser excerpts in errors."""
     if len(raw) > MAX_BYTES:
         raise HarError("Input exceeds the 32 MiB limit.")
+    # Python JSON nesting behavior differs by version. Bound it before decoding,
+    # ignoring braces in strings and correctly consuming escaped quote/backslash.
+    depth, in_string, escaped = 0, False, False
+    for char in raw:
+        if in_string:
+            if escaped:
+                escaped = False
+            elif char == 92:
+                escaped = True
+            elif char == 34:
+                in_string = False
+        elif char == 34:
+            in_string = True
+        elif char in (91, 123):
+            depth += 1
+            if depth > MAX_DEPTH:
+                raise HarError("JSON nesting exceeds the 128-level limit.")
+        elif char in (93, 125):
+            depth -= 1
     try:
         return json.loads(raw.decode("utf-8-sig"), object_pairs_hook=_pairs,
                           parse_constant=_constant)

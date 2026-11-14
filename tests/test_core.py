@@ -102,6 +102,15 @@ class CoreTests(unittest.TestCase):
                 parse(raw)
             self.assertNotIn("SECRET", str(ctx.exception))
 
+    def test_explicit_nesting_limit(self):
+        self.assertIsInstance(parse(b"[" * 128 + b"]" * 128), list)
+        with self.assertRaises(HarError):
+            parse(b"[" * 129 + b"]" * 129)
+
+    def test_nesting_ignores_escaped_strings(self):
+        value = '[]{}"\\' * 1000
+        self.assertEqual(parse(json.dumps({"text": value}).encode()), {"text": value})
+
     def test_limits(self):
         with self.assertRaises(HarError):
             parse(b" " * (MAX_BYTES + 1))

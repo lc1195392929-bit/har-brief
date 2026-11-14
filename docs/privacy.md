@@ -43,8 +43,8 @@ OS swap, crash dumps, backups and the local host's security are outside scope.
 
 ## Untrusted input limits
 
-32 MiB bytes, 100,000 entries, UTF-8 JSON; duplicate keys are rejected. Deeply nested
-input is caught at the interpreter recursion boundary. These limits reduce, but do
+32 MiB bytes, 100,000 entries, UTF-8 JSON; duplicate keys are rejected. Nesting beyond 128 levels
+is rejected before JSON decoding, independently of interpreter recursion behavior. These limits reduce, but do
 not eliminate, resource exhaustion: JSON expansion can require substantially more
 RAM, and there is no CPU timeout or sandbox. Do not run on an untrusted host or treat
 it as a hardened network-facing service. Stdin can wait indefinitely for EOF.

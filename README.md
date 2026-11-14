@@ -88,7 +88,7 @@ HTTP 4xx/5xx; `2` input, argument or I/O error. Status 0 alone does not trigger 
 
 UTF-8 JSON, optional BOM; 32 MiB input and 100,000 entries maximum. Parsing is
 in-memory and can use much more RAM than the input. Stdin waits for EOF. Duplicate
-JSON keys are rejected. A malformed entry container rejects the whole file.
+JSON keys and nesting beyond 128 levels are rejected. A malformed entry container rejects the whole file.
 This is a tolerant extractor, **not a full HAR schema validator**. Durations over
 seven days and body sizes above `2^53-1` become unknown.
 

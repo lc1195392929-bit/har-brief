@@ -7,7 +7,7 @@ certification or a claim of real customer adoption.
 
 Environment: Linux, Python 3.12.14.
 
-- **41 unittest tests passed**, including 17 independently written adversarial
+- **43 unittest tests passed**, including 17 independently written adversarial
   tests. An independent review found explicit port 0 incorrectly merged with a
   default port; this was fixed and the full suite rerun successfully.
 - Synthetic canaries in URLs, headers, cookies, payloads, status/MIME/method text,
@@ -38,7 +38,7 @@ Output was approximately 34.2 MB. This is in-memory processing, not streaming;
 - Browser-generated HAR integration: a localhost-only synthetic Chromium capture
   check was attempted, but Chromium could not launch because the environment denied
   its process-singleton socket (`Operation not permitted`). This stage did not pass;
-  it is not counted among the 41 tests.
+  it is not counted among the 43 tests.
 - Exhaustive HAR exporter compatibility, formal privacy guarantees, numeric covert
   channels, hostile-host protection or third-party security certification.
 
@@ -52,3 +52,11 @@ Actions status for the exact commit you use.
 PYTHONPATH=src python -m unittest discover -s tests -v
 PYTHONPATH=src python -m har_brief examples/demo.har
 ```
+
+## CI-found compatibility fix
+
+The first CI run on Python 3.14 exposed that the interpreter can accept nesting
+deeper than older Python versions. The initial implementation relied on the parser's
+recursion limit, which was not consistent. A byte-level preflight now enforces a fixed
+128-level limit while respecting JSON strings and escapes. Two regression tests were
+added. See the workflow for verification of the corrected commit.
